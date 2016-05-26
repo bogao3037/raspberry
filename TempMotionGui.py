@@ -1,8 +1,5 @@
-# Distributed with a free-will license.
-# Use it any way you want, profit or free, provided it fits in the licenses of its associated works.
-# SI7006-A20
-# This code is designed to work with the SI7006-A20_I2CS I2C Mini Module available from ControlEverything.com.
-# https://www.controleverything.com/content/Humidity?sku=SI7006-A20_I2CS#tabs-0-product_tabset-2
+#This is a demo 
+
 import RPi.GPIO as GPIO
 import time
 import smbus
@@ -22,7 +19,7 @@ motionCurState = False
 
 def ControlLamp():
     GPIO.output(LampGPIO, True)
-    time.sleep(1)
+    time.sleep(0.1)
     GPIO.output(LampGPIO,False)
 
 def TempHumidityUpdate(label):    
@@ -31,7 +28,7 @@ def TempHumidityUpdate(label):
         # SI7006_A20 address, 0x40(64)
     #		0xF5(245)	Select Relative Humidity NO HOLD MASTER mode
     bus.write_byte(0x40, 0xF5)
-    time.sleep(0.2)
+    time.sleep(0.5)
     # SI7006_A20 address, 0x40(64)
     # Read data back, 2 bytes, Humidity MSB first
     data0 = bus.read_byte(0x40)
@@ -44,7 +41,7 @@ def TempHumidityUpdate(label):
     #		0xF3(243)	Select temperature NO HOLD MASTER mode
     bus.write_byte(0x40, 0xF3)
     
-    time.sleep(0.2)
+    time.sleep(0.5)
     
     # SI7006_A20 address, 0x40(64)
     # Read data back, 2 bytes, Temperature MSB first
@@ -63,8 +60,8 @@ def MotionUpdate(label):
     motionPreState = motionCurState
     motionCurState = GPIO.input(MotionSensor)
     if motionCurState != motionPreState:
-        new_state = "HIGH" if motionCurState else "LOW"
-        varMotion.set("GPIO pin %s is %s" % (MotionSensor, new_state))
+        new_state = "Motion Detected" if motionCurState else "No Detect"
+        varMotion.set(new_state)
             #print("GPIO pin %s is %s" % (MotionSensor, new_state))
     label.after(1000, MotionUpdate,(label))           
         
@@ -72,19 +69,21 @@ if __name__ == '__main__':
 
 
 
-    labelTemp = Label(root, textvariable = varTemp)
+    labelTemp = Label(root, textvariable = varTemp,fg="red",height=2)
     labelTemp.pack(side=TOP)
+    labelTemp.config(font=16)
     TempHumidityUpdate(labelTemp)
     
-    labelHumidity = Label(root, textvariable = varHumidity)
+    labelHumidity = Label(root, textvariable = varHumidity,fg="blue",height=2)
     labelHumidity.pack(side=TOP)
-    
+    labelHumidity.config(font=16)
     #Motion Sensor
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(MotionSensor, GPIO.IN, GPIO.PUD_DOWN)   
     
-    labelMotion = Label(root, textvariable = varMotion)
+    labelMotion = Label(root, textvariable = varMotion,fg="green",justify="left",height=2)
     labelMotion.pack(side=TOP)    
+    labelMotion.config(font=16)
     MotionUpdate(labelMotion)
     
 
@@ -92,7 +91,8 @@ if __name__ == '__main__':
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(LampGPIO, GPIO.OUT)
     
-    button = Button(root, text='ON/OFF', width=25, command=ControlLamp)
+    button = Button(root, text='ON/OFF', width=25,height = 10, command=ControlLamp)
+    button.config(font=16)
     button.pack()
     root.mainloop()   
     
