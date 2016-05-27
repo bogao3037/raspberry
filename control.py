@@ -1,5 +1,9 @@
 #!/usr/bin/python
-#This is a demo 
+#==========================================================================
+#This is a demo for raspberry pi project
+#The Pi has a humidity/temperature sensor, motion sensor, wireless lamp
+#control.
+#==========================================================================
 
 import RPi.GPIO as GPIO
 import time
@@ -8,31 +12,44 @@ import time
 from Tkinter import *
 
 root = Tk()
-root.title("Montreal LowTech Consulting")
-root.geometry("500x500")
+root.title("TeamMontreal")
+#maximize the root window
+w, h = root.winfo_screenwidth(), root.winfo_screenheight()
+root.geometry("%dx%d+0+0" % (w, h))
+
+#define GPIO number
 LampGPIO = 18
 MotionSensor = 17
 varTemp = StringVar()
 varHumidity = StringVar()
+
+#initialize for motion sensor
 varMotion = StringVar()
-varMotion.set("No Detect")
+varMotion.set("Motion Non")
 motionPreState = False
 motionCurState = False  
 
+#=========================================================
 def ControlLamp():
+    """
+    Lamp control function.
+    """
     GPIO.output(LampGPIO, True)
     time.sleep(0.1)
     GPIO.output(LampGPIO,False)
 
-def TempHumidityUpdate(label):    
+def TempHumidityUpdate(label):   
+    """
+    Temperature and Humidity sensor update function.
+    """
     # Get I2C bus
     bus = smbus.SMBus(1)
-        # SI7006_A20 address, 0x40(64)
-    #		0xF5(245)	Select Relative Humidity NO HOLD MASTER mode
+    #SI7006_A20 address, 0x40(64)
+    #0xF5(245)	Select Relative Humidity NO HOLD MASTER mode
     bus.write_byte(0x40, 0xF5)
     time.sleep(0.5)
-    # SI7006_A20 address, 0x40(64)
-    # Read data back, 2 bytes, Humidity MSB first
+    #SI7006_A20 address, 0x40(64)
+    #Read data back, 2 bytes, Humidity MSB first
     data0 = bus.read_byte(0x40)
     data1 = bus.read_byte(0x40)
     
@@ -40,17 +57,16 @@ def TempHumidityUpdate(label):
     humidity = (125.0 * (data0 * 256.0 + data1) / 65536.0) - 6.0
     
     # SI7006_A20 address, 0x40(64) 
-    #		0xF3(243)	Select temperature NO HOLD MASTER mode
+    #0xF3(243)	Select temperature NO HOLD MASTER mode
     bus.write_byte(0x40, 0xF3)
     
-    time.sleep(0.5)
-    
+    time.sleep(0.5)    
     # SI7006_A20 address, 0x40(64)
     # Read data back, 2 bytes, Temperature MSB first
     data0 = bus.read_byte(0x40)
     data1 = bus.read_byte(0x40)
     
-    # Convert the data
+    #Convert the data
     cTemp = (175.72 * (data0 * 256.0 + data1) / 65536.0) - 46.85
     fTemp = cTemp * 1.8 + 32
     varTemp.set("Temperature: %.2f C" %cTemp)
@@ -62,7 +78,7 @@ def MotionUpdate(label):
     motionPreState = motionCurState
     motionCurState = GPIO.input(MotionSensor)
     if motionCurState != motionPreState:
-        new_state = "Motion Detected" if motionCurState else "No Detect"
+        new_state = "Motion Detected" if motionCurState else "Motion Non"
         varMotion.set(new_state)
             #print("GPIO pin %s is %s" % (MotionSensor, new_state))
     label.after(1000, MotionUpdate,(label))           
@@ -85,20 +101,12 @@ if __name__ == '__main__':
     labelHumidity.pack(side=TOP)
     labelHumidity.config(font=16)
 	
-    TempHumidityUpdate(labelTemp)
-    
-
-	
-   
-    
-
-    
-
+    TempHumidityUpdate(labelTemp)    
 
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(LampGPIO, GPIO.OUT)
     
-    button = Button(root, text='ON/OFF', width=25,height = 10, command=ControlLamp)
+    button = Button(root, text='ON/OFF', width=50,height = 20, command=ControlLamp)
     button.config(font=16)
     button.pack(side=BOTTOM)
     root.mainloop()   
