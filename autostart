@@ -1,0 +1,4 @@
+@lxpanel --profile LXDE-pi
+@pcmanfm --desktop --profile LXDE-pi
+@xscreensaver -no-splash
+@/usr/bin/sudo /usr/bin/python /home/pi/git/raspberry/control.py

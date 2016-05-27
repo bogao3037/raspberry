@@ -1,3 +1,4 @@
+#!/usr/bin/python
 #This is a demo 
 
 import RPi.GPIO as GPIO
@@ -14,6 +15,7 @@ MotionSensor = 17
 varTemp = StringVar()
 varHumidity = StringVar()
 varMotion = StringVar()
+varMotion.set("No Detect")
 motionPreState = False
 motionCurState = False  
 
@@ -66,25 +68,30 @@ def MotionUpdate(label):
     label.after(1000, MotionUpdate,(label))           
         
 if __name__ == '__main__':        
+ #Motion Sensor
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(MotionSensor, GPIO.IN, GPIO.PUD_DOWN)   
 
-
+    labelMotion = Label(root, textvariable = varMotion,fg="green",height=2)
+    labelMotion.pack(side=TOP)    
+    labelMotion.config(font=16)
+    MotionUpdate(labelMotion)
 
     labelTemp = Label(root, textvariable = varTemp,fg="red",height=2)
     labelTemp.pack(side=TOP)
     labelTemp.config(font=16)
-    TempHumidityUpdate(labelTemp)
-    
+	
     labelHumidity = Label(root, textvariable = varHumidity,fg="blue",height=2)
     labelHumidity.pack(side=TOP)
     labelHumidity.config(font=16)
-    #Motion Sensor
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(MotionSensor, GPIO.IN, GPIO.PUD_DOWN)   
+	
+    TempHumidityUpdate(labelTemp)
     
-    labelMotion = Label(root, textvariable = varMotion,fg="green",justify="left",height=2)
-    labelMotion.pack(side=TOP)    
-    labelMotion.config(font=16)
-    MotionUpdate(labelMotion)
+
+	
+   
+    
+
     
 
 
@@ -93,6 +100,6 @@ if __name__ == '__main__':
     
     button = Button(root, text='ON/OFF', width=25,height = 10, command=ControlLamp)
     button.config(font=16)
-    button.pack()
+    button.pack(side=BOTTOM)
     root.mainloop()   
     
